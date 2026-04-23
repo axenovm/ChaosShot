@@ -1,0 +1,5 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changes/001-initial-schema.sql
+  - include:
+      file: db/changelog/changes/003-drop-shots-cache-and-shot-type.sql

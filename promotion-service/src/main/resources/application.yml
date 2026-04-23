@@ -1,0 +1,22 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: promotion-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/promotion-db
+    username: postgres
+    password: 123321
+  kafka:
+    bootstrap-servers: localhost:9092
+
+outbox:
+  publisher:
+    fixed-delay-ms: 5000
+    batch-size: 100
+    topic-name: promotions-events
+
+promotion:
+  creation:
+    cron: "0 */15 * * * *"
