@@ -5,6 +5,7 @@ import java.util.UUID;
 
 public record OrderPromotion(
         UUID promotionId,
+        UUID shotId,
         UUID eventId,
         String name,
         Integer discountPercent,
