@@ -34,7 +34,7 @@ public class PromotionEventConsumer {
                     log.info("Promotion upsert handled: " + event.eventId());
                     break;
                 case "PROMOTION_DEACTIVATED":
-                    orderPromotionService.deactivatePromotion(event.eventId());
+                    orderPromotionService.deactivatePromotion(event.promotionId());
                     log.info("Promotion deactivate handled: " + event.eventId());
                     break;
                 default:

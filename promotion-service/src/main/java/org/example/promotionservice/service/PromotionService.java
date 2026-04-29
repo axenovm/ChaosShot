@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -63,7 +62,7 @@ public class PromotionService {
                 promotionRequest.name(),
                 (int) (Math.random() * 81) + 10,
                 LocalDateTime.now(),
-                LocalDateTime.now().plusDays(new Random().nextInt(30) + 1),
+                LocalDateTime.now().plusHours(12),
                 true);
 
         if (!promotionRepository.create(promotion)) {
@@ -79,6 +78,24 @@ public class PromotionService {
         }
 
         return convertToResponse(promotion);
+    }
+
+    @Transactional
+    public void deactivateExpiredPromotions() {
+        LocalDateTime threshold = LocalDateTime.now().minusHours(12);
+        List<Promotion> expiredPromotions = promotionRepository.findActiveStartedBefore(threshold);
+        for (Promotion promotion : expiredPromotions) {
+            if (!promotionRepository.deactivateById(promotion.id())) {
+                continue;
+            }
+            outboxRepository.create(new Outbox(
+                    UUID.randomUUID(),
+                    promotion.id(),
+                    "PROMOTION_DEACTIVATED",
+                    LocalDateTime.now(),
+                    false
+            ));
+        }
     }
 
     public void deletePromotion(UUID id) {

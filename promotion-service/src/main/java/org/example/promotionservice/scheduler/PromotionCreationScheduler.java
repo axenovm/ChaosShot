@@ -20,7 +20,7 @@ public class PromotionCreationScheduler {
     private final PromotionService promotionService;
     private final Logger log = Logger.getLogger(PromotionCreationScheduler.class.getName());
 
-    @Scheduled(cron = "${promotion.creation.cron:0 */15 * * * *}")
+    @Scheduled(cron = "${promotion.creation.cron:0 0 */12 * * *}")
     public void createPromotionBySchedule() {
         LocalDateTime now = LocalDateTime.now();
         String name = buildSeasonPromotionName(now);

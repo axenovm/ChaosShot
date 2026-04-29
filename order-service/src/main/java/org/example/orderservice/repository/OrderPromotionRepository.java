@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,9 +25,30 @@ public class OrderPromotionRepository {
                 .findFirst();
     }
 
+    public Optional<OrderPromotion> findByPromotionId(UUID promotionId) {
+        String sql = "SELECT * FROM order_promotions WHERE promotion_id = :promotion_id";
+        return namedParameterJdbcTemplate.query(sql, Map.of("promotion_id", promotionId), ORDER_PROMOTION_ROW_MAPPER)
+                .stream()
+                .findFirst();
+    }
+
+    public List<OrderPromotion> findActiveByShotId(UUID shotId) {
+        String sql = """
+                SELECT * FROM order_promotions
+                WHERE shot_id = :shot_id
+                  AND is_active = true
+                """;
+        return namedParameterJdbcTemplate.query(sql, Map.of("shot_id", shotId), ORDER_PROMOTION_ROW_MAPPER);
+    }
+
     public boolean deactivatePromotion(UUID eventId) {
         String sql = "UPDATE order_promotions SET is_active = false WHERE event_id = :event_id";
         return namedParameterJdbcTemplate.update(sql, Map.of("event_id", eventId)) == 1;
+    }
+
+    public boolean deactivatePromotionByPromotionId(UUID promotionId) {
+        String sql = "UPDATE order_promotions SET is_active = false WHERE promotion_id = :promotion_id AND is_active = true";
+        return namedParameterJdbcTemplate.update(sql, Map.of("promotion_id", promotionId)) == 1;
     }
 
     public boolean upsert(OrderPromotion orderPromotion) {

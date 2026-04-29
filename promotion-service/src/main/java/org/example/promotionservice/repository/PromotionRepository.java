@@ -52,6 +52,16 @@ public class PromotionRepository {
         return namedParameterJdbcTemplate.query(sql, PROMOTION_ROW_MAPPER);
     }
 
+    public List<Promotion> findActiveStartedBefore(LocalDateTime threshold) {
+        String sql = """
+            SELECT * FROM promotions
+            WHERE is_active = true
+              AND starts_at <= :threshold
+            ORDER BY starts_at ASC
+            """;
+        return namedParameterJdbcTemplate.query(sql, Map.of("threshold", threshold), PROMOTION_ROW_MAPPER);
+    }
+
     public boolean create(Promotion promotion) {
         String sql = """
             INSERT INTO promotions (id, name, discount_percent, starts_at, ends_at, is_active)
@@ -90,6 +100,16 @@ public class PromotionRepository {
 
     public boolean deleteById(UUID id) {
         String sql = "DELETE FROM promotions WHERE id = :id";
+        return namedParameterJdbcTemplate.update(sql, Map.of("id", id)) == 1;
+    }
+
+    public boolean deactivateById(UUID id) {
+        String sql = """
+            UPDATE promotions
+            SET is_active = false
+            WHERE id = :id
+              AND is_active = true
+            """;
         return namedParameterJdbcTemplate.update(sql, Map.of("id", id)) == 1;
     }
 

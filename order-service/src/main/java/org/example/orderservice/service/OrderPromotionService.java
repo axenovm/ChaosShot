@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 @Service
 @RequiredArgsConstructor
@@ -23,12 +24,13 @@ public class OrderPromotionService {
     private final BarMenuItemRepository barMenuItemRepository;
     private final BarRepository barRepository;
     private final OrderPromotionRepository orderPromotionRepository;
+    private final Logger log = Logger.getLogger(OrderPromotionService.class.getName());
 
-    public void deactivatePromotion(UUID eventId)
+    public void deactivatePromotion(UUID promotionId)
     {
-        OrderPromotion orderPromotion = orderPromotionRepository.findById(eventId).orElseThrow(
+        OrderPromotion orderPromotion = orderPromotionRepository.findByPromotionId(promotionId).orElseThrow(
                 ()->new ResourceNotFoundException("Order Promotion not found"));
-        orderPromotionRepository.deactivatePromotion(eventId);
+        orderPromotionRepository.deactivatePromotionByPromotionId(promotionId);
         BarMenuItem barMenuItem = barMenuItemRepository.findById(orderPromotion.shotId()).orElseThrow(
                 (()->new ResourceNotFoundException("Bar MenuItem not found")));
 
@@ -46,7 +48,15 @@ public class OrderPromotionService {
         List<Bar> bars  = barRepository.findAllBars();
         for (Bar bar : bars) {
             List<BarMenuItem> barMenuItems = barMenuItemRepository.findMenuByBarId(bar.id());
+            if (barMenuItems.isEmpty()) {
+                log.warning("Promotion skipped for bar without menu items: " + bar.id());
+                continue;
+            }
             BarMenuItem barMenuItemToPromo = barMenuItems.get((int) (Math.random() * barMenuItems.size()));
+            List<OrderPromotion> activePromotionsOnShot = orderPromotionRepository.findActiveByShotId(barMenuItemToPromo.id());
+            for (OrderPromotion activePromotion : activePromotionsOnShot) {
+                deactivatePromotion(activePromotion.promotionId());
+            }
 
             BigDecimal discountMultiplier = BigDecimal.valueOf(100 - promotionEvent.discountPercent())
                     .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);

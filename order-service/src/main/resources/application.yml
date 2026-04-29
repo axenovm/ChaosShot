@@ -14,3 +14,9 @@ spring:
 kafka:
   topics:
     promotions: promotions-events
+
+server:
+  tomcat:
+    accesslog:
+      enabled: true
+      pattern: '%t %a "%r" %s %b %D'

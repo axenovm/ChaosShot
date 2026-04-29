@@ -1,5 +1,9 @@
 server:
   port: 8088
+  tomcat:
+    accesslog:
+      enabled: true
+      pattern: '%t %a "%r" %s %b %D'
 
 spring:
   application:
@@ -19,4 +23,6 @@ outbox:
 
 promotion:
   creation:
-    cron: "0 */15 * * * *"
+    cron: "0 0 */12 * * *"
+  deactivation:
+    fixed-delay-ms: 60000
